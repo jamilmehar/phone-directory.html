@@ -849,8 +849,25 @@
         // ============================================
         // CONFIGURATION
         // ============================================
-        let SCRIPT_URL = https://script.google.com/macros/s/AKfycbweSWAVvhoOeqq3CRBRyZRpLyOfNek6ANvOfnLu0yjLVB99bsqHIFIc0_62oCD5ZlnZ/exec;
-        let allRecords = [];
+        let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweSWAVvhoOeqq3CRBRyZRpLyOfNek6ANvOfnLu0yjLVB99bsqHIFIc0_62oCD5ZlnZ/exec';
+        let SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_NEW_URL/exec';
+
+// DEBUG: Log all API calls
+const originalFetch = window.fetch;
+window.fetch = function(...args) {
+    console.log('API Call:', args[0]);
+    return originalFetch.apply(this, args)
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response;
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            throw error;
+        });
+};
+		
+		let allRecords = [];
         let deleteTargetId = null;
 
         // Department-Section mapping
