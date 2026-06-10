@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNGPL Phone Directory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 15px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .search-section h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Add/Edit Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Results Table */
+        .results-section {
+            margin-top: 25px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-header h2 {
+            color: #1e3a8a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f1f5f9;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f1f5f9;
+        }
+
+        .number-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .dmc-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .ptcl-badge {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .dept-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-edit {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-edit:hover {
+            background: #fcd34d;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-delete:hover {
+            background: #fca5a5;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            animation: toastSlideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .settings-panel h3 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .settings-grid input {
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                gap: 20px;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+
+            .actions-cell {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Config Panel */
+        .config-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .config-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .search-section, .settings-panel, .actions-cell, .btn {
+                display: none !important;
+            }
+            .header {
+                background: #1e3a8a !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="config-toggle" onclick="toggleConfig()">⚙️ Settings</button>
+            <h1>📞 SNGPL Phone Directory</h1>
+            <p>Internal Exchange & PTCL Number Management System</p>
+	<p style="font-size:14px; font-style: italic;">
+    by: Muhammad Jamil Akhtar
+</p>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">Total Officials</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalDepts">0</div>
+                    <div class="stat-label">Departments</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalSections">0</div>
+                    <div class="stat-label">Sections</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Settings Panel -->
+            <div class="settings-panel hidden" id="configPanel">
+                <h3>🔧 Backend Configuration</h3>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Google Apps Script URL</label>
+                        <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveConfig()">Save & Connect</button>
+                </div>
+                <p style="margin-top: 10px; color: #64748b; font-size: 0.85rem;">
+                    💡 Paste your Google Apps Script Web App URL here. Data will be stored in your Google Sheet.
+                </p>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2>🔍 Search Directory</h2>
+                <div class="search-grid">
+                    <div class="form-group">
+                        <label>Quick Search (Any Field)</label>
+                        <input type="text" id="searchQuery" placeholder="Search by name, dept, number...">
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="searchDept">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Section</label>
+                        <select id="searchSection">
+                            <option value="">All Sections</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Officer Name</label>
+                        <input type="text" id="searchName" placeholder="Enter officer name">
+                    </div>
+                    <div class="form-group">
+                        <label>DMC Number (4 digits)</label>
+                        <input type="text" id="searchDMC" placeholder="0000" maxlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label>PTCL Number (3 digits)</label>
+                        <input type="text" id="searchPTCL" placeholder="000" maxlength="3">
+                    </div>
+                </div>
+                <div class="search-buttons">
+                    <button class="btn btn-primary" onclick="performSearch()">
+                        🔍 Search
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearSearch()">
+                        🔄 Clear
+                    </button>
+                    <button class="btn btn-success" onclick="openAddModal()">
+                        ➕ Add New Record
+                    </button>
+                    <button class="btn btn-warning" onclick="loadAllData()">
+                        📋 Show All Records
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h2>📋 Directory Results <span id="resultCount" style="color: #64748b; font-size: 0.9rem;"></span></h2>
+                    <button class="btn btn-secondary btn-sm" onclick="window.print()">
+                        🖨️ Print
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Department</th>
+                                <th>Section</th>
+                                <th>Officer Name</th>
+                                <th>Designation</th>
+                                <th>DMC Number</th>
+                                <th>PTCL Number</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No records found</h3>
+                        <p>Use the search filters above or click "Show All Records" to view the directory.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="recordModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">➕ Add New Record</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="recordId">
+                <div class="search-grid">
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <select id="deptSelect" required>
+                            <option value="">Select Department</option>
+                            <option value="Development">Development</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Operation">Operation</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="IT">IT</option>
+                            <option value="Legal">Legal</option>
+                            <option value="Other">Other (Type Below)</option>
+                        </select>
+                        <input type="text" id="customDept" placeholder="Or type custom department" style="margin-top: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Section *</label>
+                        <select id="sectionSelect" required>
+                            <option value="">Select Section</option>
+                        </select>
+                        <input type="text" id="customSection" placeholder="Or type custom section" style="margin-top: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Officer Name *</label>
+                        <input type="text" id="officerName" required placeholder="Full name of officer">
+                    </div>
+                    <div class="form-group">
+                        <label>Office Designation *</label>
+                        <input type="text" id="designation" required placeholder="e.g. Senior Engineer, Manager">
+                    </div>
+                    <div class="form-group">
+                        <label>DMC Number (4 digits) *</label>
+                        <input type="text" id="dmcNumber" required maxlength="4" placeholder="0000" pattern="\d{4}">
+                    </div>
+                    <div class="form-group">
+                        <label>PTCL Number (3 digits) *</label>
+                        <input type="text" id="ptclNumber" required maxlength="3" placeholder="000" pattern="\d{3}">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-success" onclick="saveRecord()">💾 Save Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                <h2>⚠️ Confirm Delete</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this record?</p>
+                <p id="deleteRecordInfo" style="margin-top: 10px; padding: 10px; background: #fee2e2; border-radius: 8px; color: #991b1b; font-weight: 500;"></p>
+                <p style="margin-top: 10px; color: #64748b; font-size: 0.9rem;">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="color: #64748b; font-weight: 500;">Processing...</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        let SCRIPT_URL = localStorage.getItem('scriptUrl') || '';
+        let allRecords = [];
+        let deleteTargetId = null;
+
+        // Department-Section mapping
+        const deptSections = {
+            'Development': ['Mains Laying', 'New Connections', 'Planning', 'Project Management', 'Survey'],
+            'Maintenance': ['Repair', 'Preventive Maintenance', 'Emergency Response', 'Equipment'],
+            'Operation': ['Control Room', 'Field Operations', 'Quality Control', 'Safety'],
+            'Administration': ['General Admin', 'Records', 'Correspondence', 'Protocol'],
+            'Finance': ['Accounts', 'Budget', 'Audit', 'Payroll'],
+            'Human Resources': ['Recruitment', 'Training', 'Employee Relations', 'Payroll'],
+            'IT': ['Network', 'Software', 'Hardware', 'Support', 'Security'],
+            'Legal': ['Compliance', 'Contracts', 'Litigation', 'Advisory']
+        };
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved URL
+            if (SCRIPT_URL) {
+                document.getElementById('scriptUrl').value = SCRIPT_URL;
+            }
+
+            // Setup department-section dropdown linkage
+            document.getElementById('deptSelect').addEventListener('change', updateSectionOptions);
+            document.getElementById('searchDept').addEventListener('change', updateSearchSectionOptions);
+
+            // Number input validation
+            document.getElementById('dmcNumber').addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+            });
+            document.getElementById('ptclNumber').addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+            });
+            document.getElementById('searchDMC').addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+            });
+            document.getElementById('searchPTCL').addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+            });
+
+            // Enter key search
+            document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            // Load data if URL is set
+            if (SCRIPT_URL) {
+                loadAllData();
+            } else {
+                showToast('Please configure your Google Apps Script URL in Settings', 'info');
+                toggleConfig();
+            }
+        });
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        function toggleConfig() {
+            document.getElementById('configPanel').classList.toggle('hidden');
+        }
+
+        function saveConfig() {
+            const url = document.getElementById('scriptUrl').value.trim();
+            if (!url) {
+                showToast('Please enter a valid URL', 'error');
+                return;
+            }
+            SCRIPT_URL = url;
+            localStorage.setItem('scriptUrl', url);
+            showToast('Configuration saved! Connecting...', 'success');
+            toggleConfig();
+            loadAllData();
+        }
+
+        function updateSectionOptions() {
+            const dept = document.getElementById('deptSelect').value;
+            const sectionSelect = document.getElementById('sectionSelect');
+            sectionSelect.innerHTML = '<option value="">Select Section</option>';
+
+            if (deptSections[dept]) {
+                deptSections[dept].forEach(section => {
+                    sectionSelect.innerHTML += `<option value="${section}">${section}</option>`;
+                });
+            }
+        }
+
+        function updateSearchSectionOptions() {
+            const dept = document.getElementById('searchDept').value;
+            const sectionSelect = document.getElementById('searchSection');
+            const currentVal = sectionSelect.value;
+            sectionSelect.innerHTML = '<option value="">All Sections</option>';
+
+            if (deptSections[dept]) {
+                deptSections[dept].forEach(section => {
+                    sectionSelect.innerHTML += `<option value="${section}">${section}</option>`;
+                });
+            }
+
+            // Restore if valid
+            if (currentVal && deptSections[dept] && deptSections[dept].includes(currentVal)) {
+                sectionSelect.value = currentVal;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+
+            toast.innerHTML = `${icons[type] || 'ℹ️'} ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '➕ Add New Record';
+            document.getElementById('recordId').value = '';
+            document.getElementById('deptSelect').value = '';
+            document.getElementById('sectionSelect').innerHTML = '<option value="">Select Section</option>';
+            document.getElementById('customDept').value = '';
+            document.getElementById('customSection').value = '';
+            document.getElementById('officerName').value = '';
+            document.getElementById('designation').value = '';
+            document.getElementById('dmcNumber').value = '';
+            document.getElementById('ptclNumber').value = '';
+            document.getElementById('recordModal').classList.add('active');
+        }
+
+        function openEditModal(record) {
+            document.getElementById('modalTitle').textContent = '✏️ Edit Record';
+            document.getElementById('recordId').value = record.ID;
+
+            // Check if department is in predefined list
+            const predefinedDepts = Object.keys(deptSections);
+            if (predefinedDepts.includes(record.Department)) {
+                document.getElementById('deptSelect').value = record.Department;
+                updateSectionOptions();
+                document.getElementById('sectionSelect').value = record.Section;
+                document.getElementById('customDept').value = '';
+                document.getElementById('customSection').value = '';
+            } else {
+                document.getElementById('deptSelect').value = 'Other';
+                document.getElementById('customDept').value = record.Department;
+                document.getElementById('sectionSelect').innerHTML = '<option value="">Select Section</option>';
+                document.getElementById('customSection').value = record.Section;
+            }
+
+            document.getElementById('officerName').value = record.OfficerName;
+            document.getElementById('designation').value = record.Designation;
+            document.getElementById('dmcNumber').value = record.DMC;
+            document.getElementById('ptclNumber').value = record.PTCL;
+            document.getElementById('recordModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('recordModal').classList.remove('active');
+        }
+
+        function openDeleteModal(record) {
+            deleteTargetId = record.ID;
+            document.getElementById('deleteRecordInfo').textContent = 
+                `${record.OfficerName} — ${record.Department} — DMC: ${record.DMC}`;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            deleteTargetId = null;
+        }
+
+        // ============================================
+        // DATA OPERATIONS
+        // ============================================
+        async function apiCall(action, params = {}) {
+            if (!SCRIPT_URL) {
+                showToast('Please configure Google Apps Script URL first', 'error');
+                return null;
+            }
+
+            const url = new URL(SCRIPT_URL);
+            url.searchParams.append('action', action);
+            Object.keys(params).forEach(key => {
+                if (params[key] !== undefined && params[key] !== null) {
+                    url.searchParams.append(key, params[key]);
+                }
+            });
+
+            try {
+                const response = await fetch(url, {
+                    method: action === 'getAll' || action === 'search' ? 'GET' : 'POST',
+                    mode: 'cors'
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast('Connection failed. Check your URL and internet.', 'error');
+                return null;
+            }
+        }
+
+        async function loadAllData() {
+            showLoading();
+            const result = await apiCall('getAll');
+            hideLoading();
+
+            if (result && result.success) {
+                allRecords = result.data;
+                updateStats();
+                updateDropdowns();
+                displayResults(allRecords);
+                showToast(`Loaded ${allRecords.length} records`, 'success');
+            } else if (result) {
+                showToast(result.error || 'Failed to load data', 'error');
+            }
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const department = document.getElementById('searchDept').value;
+            const section = document.getElementById('searchSection').value;
+            const dmc = document.getElementById('searchDMC').value;
+            const ptcl = document.getElementById('searchPTCL').value;
+            const name = document.getElementById('searchName').value.trim();
+
+            // If no filters, show all
+            if (!query && !department && !section && !dmc && !ptcl && !name) {
+                displayResults(allRecords);
+                return;
+            }
+
+            showLoading();
+
+            // Client-side filtering for speed, fallback to API if needed
+            const filtered = allRecords.filter(record => {
+                const searchableText = [
+                    record.Department, record.Section, record.OfficerName,
+                    record.Designation, String(record.DMC), String(record.PTCL)
+                ].join(' ').toLowerCase();
+
+                if (query && !searchableText.includes(query.toLowerCase())) return false;
+                if (department && record.Department !== department) return false;
+                if (section && record.Section !== section) return false;
+                if (dmc && String(record.DMC) !== dmc) return false;
+                if (ptcl && String(record.PTCL) !== ptcl) return false;
+                if (name && !record.OfficerName.toLowerCase().includes(name.toLowerCase())) return false;
+
+                return true;
+            });
+
+            hideLoading();
+            displayResults(filtered);
+
+            if (filtered.length === 0) {
+                showToast('No matching records found', 'info');
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('searchDept').value = '';
+            document.getElementById('searchSection').innerHTML = '<option value="">All Sections</option>';
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchDMC').value = '';
+            document.getElementById('searchPTCL').value = '';
+            displayResults(allRecords);
+        }
+
+        async function saveRecord() {
+            const id = document.getElementById('recordId').value;
+            const deptSelect = document.getElementById('deptSelect').value;
+            const customDept = document.getElementById('customDept').value.trim();
+            const sectionSelect = document.getElementById('sectionSelect').value;
+            const customSection = document.getElementById('customSection').value.trim();
+
+            const department = deptSelect === 'Other' ? customDept : deptSelect;
+            const section = sectionSelect || customSection;
+
+            const officerName = document.getElementById('officerName').value.trim();
+            const designation = document.getElementById('designation').value.trim();
+            const dmc = document.getElementById('dmcNumber').value.trim();
+            const ptcl = document.getElementById('ptclNumber').value.trim();
+
+            // Validation
+            if (!department || !section || !officerName || !designation || !dmc || !ptcl) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+            if (dmc.length !== 4 || !/^\d{4}$/.test(dmc)) {
+                showToast('DMC number must be exactly 4 digits', 'error');
+                return;
+            }
+            if (ptcl.length !== 3 || !/^\d{3}$/.test(ptcl)) {
+                showToast('PTCL number must be exactly 3 digits', 'error');
+                return;
+            }
+
+            // Check for duplicate DMC/PTCL
+            const duplicate = allRecords.find(r => 
+                r.ID !== id && (r.DMC === dmc || r.PTCL === ptcl)
+            );
+            if (duplicate && !id) {
+                showToast(`Number already exists: ${duplicate.OfficerName}`, 'error');
+                return;
+            }
+
+            showLoading();
+
+            const params = {
+                department, section, officerName, designation, dmc, ptcl
+            };
+
+            if (id) {
+                params.id = id;
+                const result = await apiCall('update', params);
+                hideLoading();
+
+                if (result && result.success) {
+                    showToast('Record updated successfully', 'success');
+                    closeModal();
+                    loadAllData();
+                } else {
+                    showToast(result?.error || 'Update failed', 'error');
+                }
+            } else {
+                const result = await apiCall('add', params);
+                hideLoading();
+
+                if (result && result.success) {
+                    showToast('Record added successfully', 'success');
+                    closeModal();
+                    loadAllData();
+                } else {
+                    showToast(result?.error || 'Add failed', 'error');
+                }
+            }
+        }
+
+        async function confirmDelete() {
+            if (!deleteTargetId) return;
+
+            showLoading();
+            const result = await apiCall('delete', { id: deleteTargetId });
+            hideLoading();
+
+            if (result && result.success) {
+                showToast('Record deleted successfully', 'success');
+                closeDeleteModal();
+                loadAllData();
+            } else {
+                showToast(result?.error || 'Delete failed', 'error');
+            }
+        }
+
+        // ============================================
+        // DISPLAY FUNCTIONS
+        // ============================================
+        function displayResults(records) {
+            const tbody = document.getElementById('resultsBody');
+            const emptyState = document.getElementById('emptyState');
+            const resultCount = document.getElementById('resultCount');
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                resultCount.textContent = '';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            resultCount.textContent = `(${records.length} record${records.length !== 1 ? 's' : ''})`;
+
+            tbody.innerHTML = records.map((record, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="dept-tag">${escapeHtml(record.Department)}</span></td>
+                    <td><span class="section-tag">${escapeHtml(record.Section)}</span></td>
+                    <td><strong>${escapeHtml(record.OfficerName)}</strong></td>
+                    <td>${escapeHtml(record.Designation)}</td>
+                    <td><span class="number-badge dmc-badge">${escapeHtml(String(record.DMC))}</span></td>
+                    <td><span class="number-badge ptcl-badge">${escapeHtml(String(record.PTCL))}</span></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn-icon btn-edit" onclick='openEditModal(${JSON.stringify(record).replace(/'/g, "&#39;")})' title="Edit">
+                                ✏️
+                            </button>
+                            <button class="btn-icon btn-delete" onclick='openDeleteModal(${JSON.stringify(record).replace(/'/g, "&#39;")})' title="Delete">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            const depts = new Set(allRecords.map(r => r.Department).filter(Boolean));
+            const sections = new Set(allRecords.map(r => r.Section).filter(Boolean));
+
+            document.getElementById('totalRecords').textContent = allRecords.length;
+            document.getElementById('totalDepts').textContent = depts.size;
+            document.getElementById('totalSections').textContent = sections.size;
+        }
+
+        function updateDropdowns() {
+            const deptSelect = document.getElementById('searchDept');
+            const currentDept = deptSelect.value;
+
+            // Get unique departments from data + predefined
+            const allDepts = new Set([
+                ...Object.keys(deptSections),
+                ...allRecords.map(r => r.Department)
+            ]);
+
+            deptSelect.innerHTML = '<option value="">All Departments</option>';
+            Array.from(allDepts).sort().forEach(dept => {
+                if (dept) deptSelect.innerHTML += `<option value="${escapeHtml(dept)}">${escapeHtml(dept)}</option>`;
+            });
+
+            if (currentDept && allDepts.has(currentDept)) {
+                deptSelect.value = currentDept;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modals on overlay click
+        document.getElementById('recordModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+    </script>
+</body>
+</html>
