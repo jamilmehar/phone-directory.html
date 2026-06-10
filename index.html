@@ -553,6 +553,80 @@
             width: 100%;
         }
 
+        /* Debug Panel */
+        .debug-panel {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .debug-panel.active {
+            display: block;
+        }
+
+        .debug-panel h4 {
+            color: #38bdf8;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .debug-line {
+            padding: 2px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .debug-line.error {
+            color: #f87171;
+        }
+
+        .debug-line.success {
+            color: #4ade80;
+        }
+
+        .debug-line.warn {
+            color: #fbbf24;
+        }
+
+        /* Status Banner */
+        .status-banner {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-banner.active {
+            display: flex;
+        }
+
+        .status-banner.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-banner.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .status-banner.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header h1 {
@@ -620,7 +694,7 @@
                 box-shadow: none;
                 border-radius: 0;
             }
-            .search-section, .settings-panel, .actions-cell, .btn {
+            .search-section, .settings-panel, .actions-cell, .btn, .debug-panel, .status-banner {
                 display: none !important;
             }
             .header {
@@ -630,7 +704,6 @@
             }
         }
     </style>
-<base target="_blank">
 </head>
 <body>
     <div class="container">
@@ -639,9 +712,7 @@
             <button class="config-toggle" onclick="toggleConfig()">⚙️ Settings</button>
             <h1>📞 SNGPL Phone Directory</h1>
             <p>Internal Exchange & PTCL Number Management System</p>
-	<p style="font-size:14px; font-style: italic;">
-    by: Muhammad Jamil Akhtar
-</p>
+            <p style="font-size:14px; font-style: italic;">by: Muhammad Jamil Akhtar</p>
             <div class="stats-bar">
                 <div class="stat-item">
                     <div class="stat-value" id="totalRecords">0</div>
@@ -659,6 +730,18 @@
         </div>
 
         <div class="main-content">
+            <!-- Status Banner -->
+            <div class="status-banner info" id="statusBanner">
+                <span id="statusIcon">ℹ️</span>
+                <span id="statusMessage">Loading...</span>
+            </div>
+
+            <!-- Debug Panel -->
+            <div class="debug-panel" id="debugPanel">
+                <h4>🔧 Debug Console (Press F12 for browser console)</h4>
+                <div id="debugContent"></div>
+            </div>
+
             <!-- Settings Panel -->
             <div class="settings-panel hidden" id="configPanel">
                 <h3>🔧 Backend Configuration</h3>
@@ -719,6 +802,9 @@
                     </button>
                     <button class="btn btn-warning" onclick="loadAllData()">
                         📋 Show All Records
+                    </button>
+                    <button class="btn btn-secondary" onclick="toggleDebug()">
+                        🐛 Debug
                     </button>
                 </div>
             </div>
@@ -847,28 +933,12 @@
 
     <script>
         // ============================================
-        // CONFIGURATION
+        // CONFIGURATION - FIXED: URL IS NOW IN QUOTES
         // ============================================
         let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweSWAVvhoOeqq3CRBRyZRpLyOfNek6ANvOfnLu0yjLVB99bsqHIFIc0_62oCD5ZlnZ/exec';
-        let SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_NEW_URL/exec';
-
-// DEBUG: Log all API calls
-const originalFetch = window.fetch;
-window.fetch = function(...args) {
-    console.log('API Call:', args[0]);
-    return originalFetch.apply(this, args)
-        .then(response => {
-            console.log('Response status:', response.status);
-            return response;
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            throw error;
-        });
-};
-		
-		let allRecords = [];
+        let allRecords = [];
         let deleteTargetId = null;
+        let debugMode = false;
 
         // Department-Section mapping
         const deptSections = {
@@ -883,12 +953,66 @@ window.fetch = function(...args) {
         };
 
         // ============================================
+        // DEBUGGING UTILITIES
+        // ============================================
+        function logDebug(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = `[${timestamp}] ${message}`;
+            console.log(`[${type.toUpperCase()}] ${line}`);
+
+            // Also show in on-page debug panel
+            const debugContent = document.getElementById('debugContent');
+            if (debugContent) {
+                const div = document.createElement('div');
+                div.className = `debug-line ${type}`;
+                div.textContent = line;
+                debugContent.appendChild(div);
+                debugContent.scrollTop = debugContent.scrollHeight;
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const banner = document.getElementById('statusBanner');
+            const icon = document.getElementById('statusIcon');
+            const msg = document.getElementById('statusMessage');
+
+            banner.className = `status-banner ${type} active`;
+            msg.textContent = message;
+
+            const icons = { info: 'ℹ️', success: '✅', error: '❌', warn: '⚠️' };
+            icon.textContent = icons[type] || 'ℹ️';
+
+            logDebug(message, type);
+        }
+
+        function hideStatus() {
+            document.getElementById('statusBanner').classList.remove('active');
+        }
+
+        function toggleDebug() {
+            debugMode = !debugMode;
+            document.getElementById('debugPanel').classList.toggle('active');
+            showToast(debugMode ? 'Debug mode ON' : 'Debug mode OFF', 'info');
+        }
+
+        // ============================================
         // INITIALIZATION
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Load saved URL
-            if (SCRIPT_URL) {
+            logDebug('App initialized. SCRIPT_URL configured.', 'success');
+            logDebug('Backend URL: ' + SCRIPT_URL.substring(0, 50) + '...', 'info');
+
+            // Show initial status
+            showStatus('Connecting to backend...', 'info');
+
+            // Load saved URL (fallback to hardcoded)
+            const savedUrl = localStorage.getItem('scriptUrl');
+            if (savedUrl) {
+                document.getElementById('scriptUrl').value = savedUrl;
+                logDebug('Found saved URL in localStorage', 'info');
+            } else {
                 document.getElementById('scriptUrl').value = SCRIPT_URL;
+                logDebug('Using hardcoded URL', 'info');
             }
 
             // Setup department-section dropdown linkage
@@ -914,11 +1038,13 @@ window.fetch = function(...args) {
                 if (e.key === 'Enter') performSearch();
             });
 
-            // Load data if URL is set
-            if (SCRIPT_URL) {
+            // Auto-load data
+            if (SCRIPT_URL && SCRIPT_URL.includes('script.google.com')) {
+                logDebug('URL looks valid. Attempting to load data...', 'info');
                 loadAllData();
             } else {
-                showToast('Please configure your Google Apps Script URL in Settings', 'info');
+                showStatus('Backend URL not configured. Click Settings to configure.', 'error');
+                logDebug('Invalid or missing SCRIPT_URL', 'error');
                 toggleConfig();
             }
         });
@@ -939,6 +1065,7 @@ window.fetch = function(...args) {
             SCRIPT_URL = url;
             localStorage.setItem('scriptUrl', url);
             showToast('Configuration saved! Connecting...', 'success');
+            logDebug('New URL saved: ' + url.substring(0, 50) + '...', 'success');
             toggleConfig();
             loadAllData();
         }
@@ -967,7 +1094,6 @@ window.fetch = function(...args) {
                 });
             }
 
-            // Restore if valid
             if (currentVal && deptSections[dept] && deptSections[dept].includes(currentVal)) {
                 sectionSelect.value = currentVal;
             }
@@ -1023,7 +1149,6 @@ window.fetch = function(...args) {
             document.getElementById('modalTitle').textContent = '✏️ Edit Record';
             document.getElementById('recordId').value = record.ID;
 
-            // Check if department is in predefined list
             const predefinedDepts = Object.keys(deptSections);
             if (predefinedDepts.includes(record.Department)) {
                 document.getElementById('deptSelect').value = record.Department;
@@ -1051,7 +1176,7 @@ window.fetch = function(...args) {
 
         function openDeleteModal(record) {
             deleteTargetId = record.ID;
-            document.getElementById('deleteRecordInfo').textContent = 
+            document.getElementById('deleteRecordInfo').textContent =
                 `${record.OfficerName} — ${record.Department} — DMC: ${record.DMC}`;
             document.getElementById('deleteModal').classList.add('active');
         }
@@ -1062,11 +1187,12 @@ window.fetch = function(...args) {
         }
 
         // ============================================
-        // DATA OPERATIONS
+        // DATA OPERATIONS - WITH DEBUGGING
         // ============================================
         async function apiCall(action, params = {}) {
             if (!SCRIPT_URL) {
                 showToast('Please configure Google Apps Script URL first', 'error');
+                logDebug('API call failed: No SCRIPT_URL configured', 'error');
                 return null;
             }
 
@@ -1078,16 +1204,28 @@ window.fetch = function(...args) {
                 }
             });
 
+            logDebug(`API Call: ${action} -> ${url.toString().substring(0, 80)}...`, 'info');
+
             try {
                 const response = await fetch(url, {
                     method: action === 'getAll' || action === 'search' ? 'GET' : 'POST',
                     mode: 'cors'
                 });
 
-                if (!response.ok) throw new Error('Network response was not ok');
-                return await response.json();
+                logDebug(`Response status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                logDebug(`Response data: success=${data.success}`, data.success ? 'success' : 'warn');
+                return data;
+
             } catch (error) {
                 console.error('API Error:', error);
+                logDebug(`API Error: ${error.message}`, 'error');
+                showStatus(`Connection failed: ${error.message}. Check console (F12) for details.`, 'error');
                 showToast('Connection failed. Check your URL and internet.', 'error');
                 return null;
             }
@@ -1095,6 +1233,9 @@ window.fetch = function(...args) {
 
         async function loadAllData() {
             showLoading();
+            showStatus('Loading data from Google Sheets...', 'info');
+            logDebug('Starting loadAllData()', 'info');
+
             const result = await apiCall('getAll');
             hideLoading();
 
@@ -1103,9 +1244,15 @@ window.fetch = function(...args) {
                 updateStats();
                 updateDropdowns();
                 displayResults(allRecords);
-                showToast(`Loaded ${allRecords.length} records`, 'success');
+                showStatus(`Loaded ${allRecords.length} records successfully`, 'success');
+                logDebug(`Loaded ${allRecords.length} records`, 'success');
+                setTimeout(hideStatus, 3000);
             } else if (result) {
-                showToast(result.error || 'Failed to load data', 'error');
+                showStatus(`Failed to load: ${result.error || 'Unknown error'}`, 'error');
+                logDebug(`Load failed: ${result.error}`, 'error');
+            } else {
+                showStatus('Failed to connect to backend. Check URL and try again.', 'error');
+                logDebug('Load failed: No response from server', 'error');
             }
         }
 
@@ -1117,7 +1264,8 @@ window.fetch = function(...args) {
             const ptcl = document.getElementById('searchPTCL').value;
             const name = document.getElementById('searchName').value.trim();
 
-            // If no filters, show all
+            logDebug(`Search: query="${query}", dept="${department}", section="${section}"`, 'info');
+
             if (!query && !department && !section && !dmc && !ptcl && !name) {
                 displayResults(allRecords);
                 return;
@@ -1125,7 +1273,6 @@ window.fetch = function(...args) {
 
             showLoading();
 
-            // Client-side filtering for speed, fallback to API if needed
             const filtered = allRecords.filter(record => {
                 const searchableText = [
                     record.Department, record.Section, record.OfficerName,
@@ -1144,6 +1291,7 @@ window.fetch = function(...args) {
 
             hideLoading();
             displayResults(filtered);
+            logDebug(`Search returned ${filtered.length} results`, 'info');
 
             if (filtered.length === 0) {
                 showToast('No matching records found', 'info');
@@ -1158,6 +1306,7 @@ window.fetch = function(...args) {
             document.getElementById('searchDMC').value = '';
             document.getElementById('searchPTCL').value = '';
             displayResults(allRecords);
+            logDebug('Search cleared', 'info');
         }
 
         async function saveRecord() {
@@ -1175,7 +1324,8 @@ window.fetch = function(...args) {
             const dmc = document.getElementById('dmcNumber').value.trim();
             const ptcl = document.getElementById('ptclNumber').value.trim();
 
-            // Validation
+            logDebug(`Saving record: ${officerName}, DMC=${dmc}, PTCL=${ptcl}`, 'info');
+
             if (!department || !section || !officerName || !designation || !dmc || !ptcl) {
                 showToast('Please fill all required fields', 'error');
                 return;
@@ -1189,8 +1339,7 @@ window.fetch = function(...args) {
                 return;
             }
 
-            // Check for duplicate DMC/PTCL
-            const duplicate = allRecords.find(r => 
+            const duplicate = allRecords.find(r =>
                 r.ID !== id && (r.DMC === dmc || r.PTCL === ptcl)
             );
             if (duplicate && !id) {
@@ -1211,10 +1360,12 @@ window.fetch = function(...args) {
 
                 if (result && result.success) {
                     showToast('Record updated successfully', 'success');
+                    logDebug('Record updated: ' + id, 'success');
                     closeModal();
                     loadAllData();
                 } else {
                     showToast(result?.error || 'Update failed', 'error');
+                    logDebug('Update failed: ' + (result?.error || 'Unknown'), 'error');
                 }
             } else {
                 const result = await apiCall('add', params);
@@ -1222,10 +1373,12 @@ window.fetch = function(...args) {
 
                 if (result && result.success) {
                     showToast('Record added successfully', 'success');
+                    logDebug('Record added: ' + result.id, 'success');
                     closeModal();
                     loadAllData();
                 } else {
                     showToast(result?.error || 'Add failed', 'error');
+                    logDebug('Add failed: ' + (result?.error || 'Unknown'), 'error');
                 }
             }
         }
@@ -1234,15 +1387,18 @@ window.fetch = function(...args) {
             if (!deleteTargetId) return;
 
             showLoading();
+            logDebug('Deleting record: ' + deleteTargetId, 'warn');
             const result = await apiCall('delete', { id: deleteTargetId });
             hideLoading();
 
             if (result && result.success) {
                 showToast('Record deleted successfully', 'success');
+                logDebug('Record deleted', 'success');
                 closeDeleteModal();
                 loadAllData();
             } else {
                 showToast(result?.error || 'Delete failed', 'error');
+                logDebug('Delete failed: ' + (result?.error || 'Unknown'), 'error');
             }
         }
 
@@ -1300,7 +1456,6 @@ window.fetch = function(...args) {
             const deptSelect = document.getElementById('searchDept');
             const currentDept = deptSelect.value;
 
-            // Get unique departments from data + predefined
             const allDepts = new Set([
                 ...Object.keys(deptSections),
                 ...allRecords.map(r => r.Department)
