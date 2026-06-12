@@ -704,12 +704,13 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <button class="config-toggle" onclick="toggleConfig()">⚙️ Settings</button>
+            <button class="config-toggle" onclick="toggleConfig()" title="Settings (Password Protected)">⚙️ Settings 🔒</button>
             <h1>📞 SNGPL Phone Directory</h1>
             <p>Internal Exchange & PTCL Number Management System</p>
             <p style="font-size:14px; font-style: italic;">by: Muhammad Jamil Akhtar</p>
@@ -946,12 +947,9 @@
             'Maintenance': ['Repair', 'Preventive Maintenance', 'Emergency Response', 'Equipment'],
             'Operation': ['Control Room', 'Field Operations', 'Quality Control', 'Safety'],
             'Administration': ['General Admin', 'Records', 'Correspondence', 'Protocol'],
-            'Finance': ['Accounts', 'Treasury', 'Audit', 'Compliance'],
-            'Billing': ['Billing', 'Recovery'],
-            'Management': ['GM Office', 'Chief Office'],
-            'Sales': ['Sales'],
-            'HSE': ['HSE Office'],
+            'Human Resources': ['Recruitment', 'Training', 'Employee Relations', 'Payroll'],
             'IT': ['Network', 'Software', 'Hardware', 'Support', 'Security'],
+			'Finance': ['Accounts', 'Treasury', 'Audit', 'Compliance'],
             'Legal': ['Compliance', 'Contracts', 'Litigation', 'Advisory']
         };
 
@@ -1056,7 +1054,30 @@
         // UI FUNCTIONS
         // ============================================
         function toggleConfig() {
-            document.getElementById('configPanel').classList.toggle('hidden');
+            const panel = document.getElementById('configPanel');
+
+            // If panel is already open, just close it (no password needed to close)
+            if (!panel.classList.contains('hidden')) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            // If panel is closed, require password to open
+            const password = prompt('🔐 Enter admin password to access Settings:');
+
+            // CHANGE THIS PASSWORD to your own secure password
+            const ADMIN_PASSWORD = 'SNGPL2024';
+
+            if (password === ADMIN_PASSWORD) {
+                panel.classList.remove('hidden');
+                showToast('Settings unlocked', 'success');
+                logDebug('Settings panel unlocked by admin', 'success');
+            } else if (password !== null) {
+                // User clicked OK but wrong password (not Cancel)
+                showToast('❌ Incorrect password! Access denied.', 'error');
+                logDebug('Failed password attempt for Settings', 'warn');
+            }
+            // If password is null (Cancel clicked), do nothing silently
         }
 
         function saveConfig() {
