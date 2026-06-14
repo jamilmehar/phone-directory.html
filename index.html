@@ -860,14 +860,20 @@
                         <label>Department *</label>
                         <select id="deptSelect" required>
                             <option value="">Select Department</option>
-                            <option value="Development">Development</option>
-                            <option value="Maintenance">Maintenance</option>
-                            <option value="Operation">Operation</option>
                             <option value="Administration">Administration</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Human Resources">Human Resources</option>
-                            <option value="IT">IT</option>
-                            <option value="Legal">Legal</option>
+							<option value="Billing">Billing</option>
+							<option value="C.P">C.P</option>
+							<option value="Customer Services">Customer Services</option>
+							<option value="Development">Development</option>
+							<option value="Finance">Finance</option>
+							<option value="H.S.E">H.S.E</option>
+							<option value="IT">IT</option>
+							<option value="Legal">Legal</option>
+                            <option value="Maintenance">Maintenance</option>
+							<option value="Management">Management</option>
+                            <option value="Operation">Operation</option>
+							<option value="Quality Control">Quality Control</option>
+							<option value="Sales">Sales</option>
                             <option value="Other">Other (Type Below)</option>
                         </select>
                         <input type="text" id="customDept" placeholder="Or type custom department" style="margin-top: 8px;">
@@ -943,14 +949,20 @@
 
         // Department-Section mapping
         const deptSections = {
-            'Development': ['Mains Laying', 'New Connections', 'Planning', 'Project Management', 'Survey'],
-            'Maintenance': ['Repair', 'Preventive Maintenance', 'Emergency Response', 'Equipment'],
-            'Operation': ['Control Room', 'Field Operations', 'Quality Control', 'Safety'],
-            'Administration': ['General Admin', 'Records', 'Correspondence', 'Protocol'],
-            'Human Resources': ['Recruitment', 'Training', 'Employee Relations', 'Payroll'],
-            'IT': ['Network', 'Software', 'Hardware', 'Support', 'Security'],
-			'Finance': ['Accounts', 'Treasury', 'Audit', 'Compliance'],
-            'Legal': ['Compliance', 'Contracts', 'Litigation', 'Advisory']
+            'Administration': ['General Admin', 'Medical', 'Transport'],
+		'Billing': ['Billing', 'Recovery'],
+		'C.P': ['Corrosion'],
+		'H.S.E': ['H.S.E'],
+		'Finance': ['Accounts', 'Treasury', 'Audit', 'Compliance'],            
+		'Development': ['Mains Laying', 'New Connections', 'R.C.C', 'Drawing Office'],
+        'Maintenance': ['Maintenance', 'Rehabilitation'],
+        'Operation': ['Operation'],
+		'Quality Control': ['Quality Control'],
+        'Customer Services': ['Regional Office', 'City Office'],
+		'Management': ['G.M Office', 'Chief Office'],
+        'IT': ['I.T'],
+	    'Legal': ['Legal'],
+		'Sales': ['Sales']
         };
 
         // ============================================
