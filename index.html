@@ -713,7 +713,7 @@
             <button class="config-toggle" onclick="toggleConfig()" title="Settings (Password Protected)">⚙️ Settings 🔒</button>
             <h1>📞 SNGPL Phone Directory</h1>
             <p>Internal Exchange & PTCL Number Management System</p>
-            <p style="font-size:14px; font-style: italic;">by: Muhammad Jamil Akhtar (0301-8736470)</p>
+            <p style="font-size:14px; font-style: italic;">by: Muhammad Jamil Akhtar</p>
             <div class="stats-bar">
                 <div class="stat-item">
                     <div class="stat-value" id="totalRecords">0</div>
@@ -860,7 +860,7 @@
                         <label>Department *</label>
                         <select id="deptSelect" required>
                             <option value="">Select Department</option>
-                            <option value="Administration">Administration</option>
+							<option value="Administration">Administration</option>
 							<option value="Billing">Billing</option>
 							<option value="C.P">C.P</option>
 							<option value="Customer Services">Customer Services</option>
@@ -949,7 +949,7 @@
 
         // Department-Section mapping
         const deptSections = {
-            'Administration': ['General Admin', 'Medical', 'Transport'],
+		'Administration': ['General Admin', 'Medical', 'Transport'],
 		'Billing': ['Billing', 'Recovery'],
 		'C.P': ['Corrosion'],
 		'H.S.E': ['H.S.E'],
@@ -1375,11 +1375,19 @@
                 return;
             }
 
-            const duplicate = allRecords.find(r =>
-                r.ID !== id && (r.DMC === dmc || r.PTCL === ptcl)
-            );
-            if (duplicate && !id) {
-                showToast(`Number already exists: ${duplicate.OfficerName}`, 'error');
+            // Check for duplicate DMC (must be unique across all records)
+            const duplicateDMC = allRecords.find(r => r.ID !== id && String(r.DMC) === dmc);
+            if (duplicateDMC) {
+                showToast(`❌ DMC number ${dmc} already exists! Assigned to: ${duplicateDMC.OfficerName}`, 'error');
+                logDebug(`Duplicate DMC blocked: ${dmc} (exists for ${duplicateDMC.OfficerName})`, 'warn');
+                return;
+            }
+
+            // Check for duplicate PTCL (must be unique across all records)
+            const duplicatePTCL = allRecords.find(r => r.ID !== id && String(r.PTCL) === ptcl);
+            if (duplicatePTCL) {
+                showToast(`❌ PTCL number ${ptcl} already exists! Assigned to: ${duplicatePTCL.OfficerName}`, 'error');
+                logDebug(`Duplicate PTCL blocked: ${ptcl} (exists for ${duplicatePTCL.OfficerName})`, 'warn');
                 return;
             }
 
